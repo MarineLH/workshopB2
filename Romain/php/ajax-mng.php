@@ -15,7 +15,7 @@ if(isset($_POST)) {
             print json_encode($new_user);
             break;
         case 'create_user_fb':
-            $new_user_fb = create_user_fb($_POST['ut_prenomnom'], $_POST['ut_mail'], $_POST['ut_id_fb']);
+            $new_user_fb = create_user_fb($_POST['ut_prenomnom'], $_POST['ut_id_fb']);
             print json_encode($new_user_fb);
             break;
         case 'create_user_tw':
@@ -41,6 +41,10 @@ if(isset($_POST)) {
         case 'get_publications':
             $pubs = get_publications();
             print json_encode($pubs);
+            break;
+        case 'get_user_publications':
+            $user_pubs = get_user_publications($_POST['ut_id']);
+            print json_encode($user_pubs);
             break;
         case 'create_publication':
             $creation = create_publication($_POST['pu_titre'], $_POST['pu_contenu'], $_POST['pu_dirfichier'], $_POST['pu_id_aut'], $_POST['pu_type_fichier']);

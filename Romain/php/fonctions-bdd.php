@@ -90,7 +90,7 @@ function get_user($user_mail, $user_pwd) {
     global $bdd;
     $user_pwd = hash("sha256", $user_pwd);
 
-    $q = $bdd->prepare("SELECT ut_id, ut_id_fb, ut_id_tw, ut_prenomnom, ut_desc FROM utilisateur WHERE ut_adressemail = :user_mail AND ut_mdp = :user_pwd");
+    $q = $bdd->prepare("SELECT ut_id, ut_id_fb, ut_id_tw, ut_prenomnom, ut_desc, ut_type_utilisateur FROM utilisateur WHERE ut_adressemail = :user_mail AND ut_mdp = :user_pwd");
     $q->execute(array(
         ':user_mail' => $user_mail,
         ':user_pwd' => $user_pwd
@@ -115,17 +115,16 @@ function create_user_classic($prenomnom, $mail, $pwd) {
     }
 }
 
-function create_user_fb($prenomnom, $mail, $id_fb) {
+function create_user_fb($prenomnom, $id_fb) {
     global $bdd;
-    if(verif_mail($mail) and verif_fb($id_fb)) {
-        $q = $bdd->prepare("INSERT INTO utilisateur (ut_prenomnom, ut_adressemail, ut_type_utilisateur, ut_id_fb) VALUES (:prenomnom, :mail, 1, :id_fb)");
+    if(verif_fb($id_fb)) {
+        $q = $bdd->prepare("INSERT INTO utilisateur (ut_prenomnom, ut_type_utilisateur, ut_id_fb) VALUES (:prenomnom, 1, :id_fb)");
         $q->execute(array(
             ':prenomnom' => $prenomnom,
-            ':mail' => $mail,
             ':id_fb' => $id_fb
         ));
     }
-    $q = $bdd->prepare("SELECT ut_id, ut_prenomnom, ut_desc FROM utilisateur WHERE ut_id_fb = :id_fb");
+    $q = $bdd->prepare("SELECT ut_id, ut_id_fb, ut_id_tw, ut_prenomnom, ut_desc, ut_type_utilisateur FROM utilisateur WHERE ut_id_fb = :id_fb");
     $q->execute(array(
         ':id_fb' => $id_fb
     ));
@@ -142,7 +141,7 @@ function create_user_tw($prenomnom, $id_tw) {
             ':id_tw' => $id_tw
         ));
     }
-    $q = $bdd->prepare("SELECT ut_id, ut_prenomnom, ut_desc FROM utilisateur WHERE ut_id_tw = :id_tw");
+    $q = $bdd->prepare("SELECT ut_id, ut_id_fb, ut_id_tw, ut_prenomnom, ut_desc, ut_type_utilisateur FROM utilisateur WHERE ut_id_tw = :id_tw");
     $q->execute(array(
         ':id_tw' => $id_tw
     ));
@@ -249,7 +248,15 @@ function get_publications() {
 }
 
 function get_user_publications($ut_id) {
-    //todo: Only validated ones
+    global $bdd;
+    $q = $bdd->prepare("SELECT pu_titre, pu_date, pu_contenu, pu_dirfichier, pu_type_fichier " .
+        "FROM publication INNER JOIN utilisateur ON pu_uti_auteur = ut_id " .
+        "WHERE pu_valider = 1 AND pu_uti_auteur = :id_aut ORDER BY pu_date DESC");
+    $q->execute(array(
+        ':id_aut' => $ut_id
+    ));
+
+    return $q->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function create_publication($titre, $contenu, $dirfichier, $id_auteur, $type_fichier) {
