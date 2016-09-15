@@ -4,12 +4,13 @@ $(document).ready(function() {
         request = $.ajax({
             url: "assets/ajax-mng.php",
             type:"post",
-            data: {requete : 'get_users', user_mail: 'romain.valeye@gmail.com', user_pwd: 'truc'}
-            // la requete get_users ne requiert pas de paramètres donc ceci s'effectuera sans faire attention aux autres params
+            //data: {requete : 'get_user', ut_mail: 'test@test.com', ut_pwd: 'seb'}
+            data: {requete : 'get_publications'}
         });
 
         request.done(function (response, textStatus, jqXHR){
-            alert("Response : " & response & "textStatus : " & textStatus);
+            var jsonObj = $.parseJSON(response);
+            console.log(jsonObj);
         });
 
         // Callback handler that will be called on failure
@@ -25,7 +26,7 @@ $(document).ready(function() {
         // Callback handler that will be called regardless
         // if the request failed or succeeded
         request.always(function () {
-            console.log('Coucou');
+            //console.log('Coucou');
 
         });
     });
