@@ -234,7 +234,7 @@ function get_latest_publications() {
 
 function get_publications() {
     global $bdd;
-    $q = $bdd->prepare("SELECT pu_titre, pu_date, pu_contenu, pu_dirfichier, ut_prenomnom, pu_type_fichier " .
+    $q = $bdd->prepare("SELECT pu_id, pu_titre, pu_date, pu_contenu, pu_dirfichier, ut_prenomnom, pu_type_fichier " .
                         "FROM publication INNER JOIN utilisateur ON pu_uti_auteur = ut_id " .
                         "WHERE pu_valider = 1 ORDER BY pu_date DESC");
     try {
@@ -249,7 +249,7 @@ function get_publications() {
 
 function get_user_publications($ut_id) {
     global $bdd;
-    $q = $bdd->prepare("SELECT pu_titre, pu_date, pu_contenu, pu_dirfichier, pu_type_fichier " .
+    $q = $bdd->prepare("SELECT pu_id, pu_titre, pu_date, pu_contenu, pu_dirfichier, pu_type_fichier " .
         "FROM publication INNER JOIN utilisateur ON pu_uti_auteur = ut_id " .
         "WHERE pu_valider = 1 AND pu_uti_auteur = :id_aut ORDER BY pu_date DESC");
     $q->execute(array(
@@ -258,6 +258,19 @@ function get_user_publications($ut_id) {
 
     return $q->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function get_one_publication($pu_id) {
+    global $bdd;
+    $q = $bdd->prepare("SELECT pu_id, pu_titre, pu_date, pu_contenu, pu_dirfichier, pu_type_fichier " .
+        "FROM publication INNER JOIN utilisateur ON pu_uti_auteur = ut_id " .
+        "WHERE pu_valider = 1 AND pu_id = :pu_id");
+    $q->execute(array(
+        ':pu_id' => $pu_id
+    ));
+
+    return $q->fetch(PDO::FETCH_ASSOC);
+}
+
 
 function create_publication($titre, $contenu, $dirfichier, $id_auteur, $type_fichier) {
     global $bdd;

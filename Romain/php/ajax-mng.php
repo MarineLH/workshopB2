@@ -46,6 +46,10 @@ if(isset($_POST)) {
             $user_pubs = get_user_publications($_POST['ut_id']);
             print json_encode($user_pubs);
             break;
+        case 'get_one_publication':
+            $pub = get_one_publication($_POST['pu_id']);
+            print json_encode($pub);
+            break;
         case 'create_publication':
             $creation = create_publication($_POST['pu_titre'], $_POST['pu_contenu'], $_POST['pu_dirfichier'], $_POST['pu_id_aut'], $_POST['pu_type_fichier']);
             print json_encode($creation);
