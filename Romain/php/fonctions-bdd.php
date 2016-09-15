@@ -83,7 +83,7 @@ function search($recherche) {
                         "UNION ALL SELECT pu_id AS 'id', pu_titre AS 'Resultats', 'Publication' AS 'TypeResultat' FROM publication WHERE pu_titre LIKE :recherche " .
                         "UNION ALL SELECT pu_id AS 'id', pu_contenu AS 'Resultats', 'Publication' AS 'TypeResultat' FROM publication WHERE pu_contenu LIKE :recherche");
     $q->execute(array(
-        'recherche' => '%' . $recherche . '%'
+        ':recherche' => '%' . $recherche . '%'
     ));
 
     return $q->fetchAll(PDO::FETCH_ASSOC);
@@ -166,8 +166,8 @@ function update_description($ut_id, $desc) {
     global $bdd;
     $q = $bdd->prepare("UPDATE utilisateur SET ut_desc = :desc WHERE ut_id = :ut_id");
     $q->execute(array(
-        'desc' => $desc,
-        'ut_id' => $ut_id
+        ':desc' => $desc,
+        ':ut_id' => $ut_id
     ));
     return 'success';
 }
@@ -242,8 +242,8 @@ function get_user_like_publi($ut_id, $pu_id) {
     global $bdd;
     $q = $bdd->prepare("SELECT ut_like FROM avis WHERE pu_id = :pu_id AND ut_id = :ut_id");
     $q->execute(array(
-        'pu_id' => $pu_id,
-        'ut_id' => $ut_id
+        ':pu_id' => $pu_id,
+        ':ut_id' => $ut_id
     ));
 
     return $q->fetch(PDO::FETCH_ASSOC);
@@ -332,7 +332,6 @@ function create_publication($titre, $contenu, $dirfichier, $id_auteur, $type_fic
     } catch (Exception $e) {
         die($e->getMessage());
     }
-
 }
 
 function validate_publication($pu_id, $modo_id) {
@@ -351,15 +350,47 @@ function validate_publication($pu_id, $modo_id) {
 
 function del_publication($pu_id) {
     //todo:supprimer les likes/dislikes, les commentaires, les signalements, puis la publi
+    global $bdd;
+    $q = $bdd->prepare("DELETE FROM avis WHERE pu_id = :pu_id");
+    $q->execute(array(':pu_id' => $pu_id));
+    $q = $bdd->prepare("DELETE FROM commentaire WHERE co_publi_id = :pu_id");
+    $q->execute(array(':pu_id' => $pu_id));
+    $q = $bdd->prepare("DELETE FROM signalement WHERE pu_id = :pu_id");
+    $q->execute(array(':pu_id' => $pu_id));
+    $q = $bdd->prepare("DELETE FROM publication WHERE pu_id = :pu_id");
+    $q->execute(array(':pu_id' => $pu_id));
+    return 'success';
+
 }
 
 ////////////////////////////
 // FAVORIS
 function add_favorite($ut_id, $ut_favori) {
-    //todo
+    global $bdd;
+    $q = $bdd->prepare("INSERT INTO favoris (uti_id, uti_id_aimer) VALUES (:ut_id, :ut_favori)");
+    $q->execute(array(
+        ':ut_id' => $ut_id,
+        ':ut_favori' => $ut_favori
+    ));
+    return "success";
 }
 
 function del_favorite($ut_id, $ut_favori) {
-    //todo
+    global $bdd;
+    $q = $bdd->prepare("DELETE FROM favoris WHERE uti_id = :ut_id AND uti_id_aimer = :ut_favori");
+    $q->execute(array(
+        ':ut_id' => $ut_id,
+        ':ut_favori' => $ut_favori
+    ));
+    return "success";
+}
+
+function get_favorites($ut_id) {
+    global $bdd;
+    $q = $bdd->prepare("SELECT ut_id, ut_prenomnom FROM utilisateur INNER JOIN favoris ON ut_id = uti_id_aimer WHERE uti_id = :ut_id");
+    $q->execute(array(
+        ':ut_id' => $ut_id
+    ));
+    return $q->fetchAll(PDO::FETCH_ASSOC);
 }
 

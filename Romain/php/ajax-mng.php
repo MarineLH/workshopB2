@@ -76,10 +76,26 @@ if(isset($_POST)) {
             $valid = validate_publication($_POST['pu_id'], $_POST['modo_id']);
             print json_encode($valid);
             break;
+        case 'del_publication':
+            $del = del_publication($_POST['pu_id']);
+            print json_encode($del);
+            break;
         /////////////////////////////////////////////
         ////////////// FAVORIS //////////////////////
+        case 'add_favorite':
+            $fav = add_favorite($_POST['ut_id'], $_POST['ut_id_aimer']);
+            print json_encode($fav);
+            break;
+        case 'del_favorite':
+            $defav = del_favorite($_POST['ut_id'], $_POST['ut_id_aimer']);
+            print json_encode($defav);
+            break;
+        case 'get_favorites':
+            $favorites = get_favorites($_POST['ut_id']);
+            print json_encode($favorites);
+            break;
         default:
-            echo 'Requete inconnue';
+            print json_encode("Requete inconnue.");
             break;
     }
 }
