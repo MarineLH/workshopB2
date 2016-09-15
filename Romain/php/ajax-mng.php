@@ -94,6 +94,21 @@ if(isset($_POST)) {
             $favorites = get_favorites($_POST['ut_id']);
             print json_encode($favorites);
             break;
+        /////////////////////////////////////////////
+        ////////////// COMMENTAIRES /////////////////
+        case 'add_comment':
+            $add = add_comment($_POST['co_contenu'], $_POST['ut_id'], $_POST['pu_id']);
+            print json_encode($add);
+            break;
+        case 'del_comment':
+            $del = del_comment($_POST['co_id']);
+            print json_encode($del);
+            break;
+        case 'get_comments':
+            $comments = get_comments($_POST['co_id']);
+            print json_encode($comments);
+            break;
+        /////////////////////////////////////////////
         default:
             print json_encode("Requete inconnue.");
             break;

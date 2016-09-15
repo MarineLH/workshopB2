@@ -393,4 +393,33 @@ function get_favorites($ut_id) {
     ));
     return $q->fetchAll(PDO::FETCH_ASSOC);
 }
+////////////////////////////
+// COMMENTAIRES
+function add_comment($contenu, $ut_id, $pu_id) {
+    global $bdd;
+    $q = $bdd->prepare("INSERT INTO commentaire (co_contenu, co_uti_id, co_publi_id, co_date) VALUES (:contenu, :ut_id, :pu_id, DATEADD(NOW(), INTERVAL 2 HOUR)");
+    $q->execute(array(
+        ':ut_id' => $ut_id,
+        ':pu_id' => $pu_id,
+        ':contenu' => $contenu
+    ));
+    return 'success';
+}
 
+function del_comment($co_id) {
+    global $bdd;
+    $q = $bdd->prepare("DELETE FROM commentaire WHERE co_id = :co_id");
+    $q->execute(array(
+        ':co_id' => $co_id
+    ));
+    return "success";
+}
+
+function get_comments($pu_id) {
+    global $bdd;
+    $q = $bdd->prepare("SELECT co_id, co_contenu, co_date, ut_prenomnom FROM commentaire INNER JOIN utilisateur ON co_uti_id = ut_id WHERE co_publi_id = :pu_id ORDER BY co_date ASC");
+    $q->execute(array(
+        ':pu_id' => $pu_id
+    ));
+    return $q->fetchAll(PDO::FETCH_ASSOC);
+}
