@@ -18,7 +18,7 @@ try {
     die('Erreur : ' . $e->getMessage());
 }
 ////////////////////////////
-// VERIFICATIONS
+// VERIFICATIONS ET AUTRES
 function verif_mail($mail) {
     global $bdd;
     $q = $bdd->prepare("SELECT COUNT(*) FROM utilisateur WHERE ut_adressemail = :mail");
@@ -75,6 +75,19 @@ function is_modo_or_admin($uti_id) {
     } else {
         return false;
     }
+}
+
+function search($recherche) {
+    global $bdd;
+    $q = $bdd->prepare("SELECT ut_id AS 'id', ut_prenomnom AS 'Resultats', 'Utilisateur' AS 'TypeResultat' FROM utilisateur WHERE ut_prenomnom LIKE :recherche " .
+                        "UNION ALL SELECT pu_id AS 'id', pu_titre AS 'Resultats', 'Publication' AS 'TypeResultat' FROM publication WHERE pu_titre LIKE :recherche " .
+                        "UNION ALL SELECT pu_id AS 'id', pu_contenu AS 'Resultats', 'Publication' AS 'TypeResultat' FROM publication WHERE pu_contenu LIKE :recherche");
+    $q->execute(array(
+        'recherche' => '%' . $recherche . '%'
+    ));
+
+    return $q->fetchAll(PDO::FETCH_ASSOC);
+
 }
 ////////////////////////////
 // UTILISATEUR
@@ -224,6 +237,17 @@ function get_likes_dislikes($pu_id) {
     $simple_l_d['Dislikes'] = $likes_dislikes[1]['Nb'];
     return $simple_l_d;
 }
+
+function get_user_like_publi($ut_id, $pu_id) {
+    global $bdd;
+    $q = $bdd->prepare("SELECT ut_like FROM avis WHERE pu_id = :pu_id AND ut_id = :ut_id");
+    $q->execute(array(
+        'pu_id' => $pu_id,
+        'ut_id' => $ut_id
+    ));
+
+    return $q->fetch(PDO::FETCH_ASSOC);
+}
 ////////////////////////////
 // PUBLICATIONS
 function get_latest_publications() {
@@ -277,26 +301,6 @@ function get_one_publication($pu_id) {
     return $q->fetch(PDO::FETCH_ASSOC);
 }
 
-
-function create_publication($titre, $contenu, $dirfichier, $id_auteur, $type_fichier) {
-    global $bdd;
-    $q = $bdd->prepare("INSERT INTO publication (pu_titre, pu_contenu, pu_dirfichier, pu_uti_auteur, pu_type_fichier, pu_valider, pu_date) " .
-                        "VALUES (:titre, :contenu, :dirfichier, :id_auteur, :type_fichier, 0, DATE_ADD(NOW(), INTERVAL 2 HOUR))");
-    try {
-        $q->execute(array(
-            ':titre' => $titre,
-            ':contenu' => $contenu,
-            ':dirfichier' => $dirfichier,
-            ':id_auteur' => $id_auteur,
-            ':type_fichier' => $type_fichier
-        ));
-        return 'success';
-    } catch (Exception $e) {
-        die($e->getMessage());
-    }
-
-}
-
 function get_pending_publications() {
     global $bdd;
     $q = $bdd->prepare("SELECT pu_id, pu_titre, pu_date, pu_contenu, pu_dirfichier, ut_prenomnom, pu_type_fichier " .
@@ -310,6 +314,25 @@ function get_pending_publications() {
     }
 
     return $pending_publications;
+}
+
+function create_publication($titre, $contenu, $dirfichier, $id_auteur, $type_fichier) {
+    global $bdd;
+    $q = $bdd->prepare("INSERT INTO publication (pu_titre, pu_contenu, pu_dirfichier, pu_uti_auteur, pu_type_fichier, pu_valider, pu_date) " .
+        "VALUES (:titre, :contenu, :dirfichier, :id_auteur, :type_fichier, 0, DATE_ADD(NOW(), INTERVAL 2 HOUR))");
+    try {
+        $q->execute(array(
+            ':titre' => $titre,
+            ':contenu' => $contenu,
+            ':dirfichier' => $dirfichier,
+            ':id_auteur' => $id_auteur,
+            ':type_fichier' => $type_fichier
+        ));
+        return 'success';
+    } catch (Exception $e) {
+        die($e->getMessage());
+    }
+
 }
 
 function validate_publication($pu_id, $modo_id) {
@@ -327,10 +350,10 @@ function validate_publication($pu_id, $modo_id) {
 }
 
 function del_publication($pu_id) {
-    //todo:supprimer les likes/dislikes, les comentaires, les signalements, puis la publi
+    //todo:supprimer les likes/dislikes, les commentaires, les signalements, puis la publi
 }
 
-// *****************************************
+////////////////////////////
 // FAVORIS
 function add_favorite($ut_id, $ut_favori) {
     //todo

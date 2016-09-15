@@ -2,6 +2,10 @@
 require_once ('fonctions-bdd.php');
 if(isset($_POST)) {
     switch ($_POST['requete']) {
+        case 'search':
+            $results = search($_POST['recherche']);
+            print json_encode($results);
+            break;
         /////////////////////////////////////////////
         ////////////// UTILISATEUR //////////////////
         case 'get_users':
@@ -42,8 +46,12 @@ if(isset($_POST)) {
             $likes_dislikes = get_likes_dislikes($_POST['pu_id']);
             print json_encode($likes_dislikes);
             break;
+        case 'get_user_like_publi':
+            $user_like = get_user_like_publi($_POST['ut_id'], $_POST['pu_id']);
+            print json_encode($user_like);
+            break;
         /////////////////////////////////////////////
-        ////////////// PUBLICATIONS ///////////////
+        ////////////// PUBLICATIONS ////////////////
         case 'get_latest_publications':
             $latest_pubs = get_latest_publications();
             print json_encode($latest_pubs);
@@ -63,6 +71,10 @@ if(isset($_POST)) {
         case 'get_pending_publications':
             $pending = get_pending_publications();
             print json_encode($pending);
+            break;
+        case 'validate_publication':
+            $valid = validate_publication($_POST['pu_id'], $_POST['modo_id']);
+            print json_encode($valid);
             break;
         /////////////////////////////////////////////
         ////////////// FAVORIS //////////////////////
