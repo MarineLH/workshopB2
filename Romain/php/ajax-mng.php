@@ -35,7 +35,7 @@ if(isset($_POST)) {
             print json_encode($likes_dislikes);
             break;
         case 'get_latest_publications':
-            $latest_pubs = get_latest_publications(isset($_POST['pu_limit']) ?: $_POST['pu_limit'] = null);
+            $latest_pubs = get_latest_publications();
             print json_encode($latest_pubs);
             break;
         case 'get_publications':
@@ -47,7 +47,7 @@ if(isset($_POST)) {
             print json_encode($creation);
             break;
         default:
-            echo 'Nope';
+            echo 'Requete inconnue';
             break;
     }
 }

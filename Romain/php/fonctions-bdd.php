@@ -83,24 +83,20 @@ function get_users() {
     $q = $bdd->prepare("SELECT ut_prenomnom, ut_adressemail FROM utilisateur");
     $q->execute();
 
-    $users = $q->fetchAll(PDO::FETCH_ASSOC);
-
-    return $users;
+    return $q->fetch(PDO::FETCH_ASSOC);
 }
 
 function get_user($user_mail, $user_pwd) {
     global $bdd;
     $user_pwd = hash("sha256", $user_pwd);
 
-    $q = $bdd->prepare("SELECT ut_id, ut_id_fb, ut_id_tw FROM utilisateur WHERE ut_adressemail = :user_mail AND ut_mdp = :user_pwd");
+    $q = $bdd->prepare("SELECT ut_id, ut_id_fb, ut_id_tw, ut_prenomnom, ut_desc FROM utilisateur WHERE ut_adressemail = :user_mail AND ut_mdp = :user_pwd");
     $q->execute(array(
         ':user_mail' => $user_mail,
         ':user_pwd' => $user_pwd
     ));
 
-    $userInfo = $q->fetch(PDO::FETCH_ASSOC);
-    //die(var_dump($userInfo));
-    return $userInfo;
+    return $q->fetch(PDO::FETCH_ASSOC);
 }
 
 function create_user_classic($prenomnom, $mail, $pwd) {
@@ -128,12 +124,13 @@ function create_user_fb($prenomnom, $mail, $id_fb) {
             ':mail' => $mail,
             ':id_fb' => $id_fb
         ));
-        return 'success';
-    } elseif (!verif_mail($mail)) {
-        return 'L\'email est déjà pris.';
-    } elseif (!verif_fb($id_fb)) {
-        return 'L\'utilisateur est déjà inscrit via Facebook.';
     }
+    $q = $bdd->prepare("SELECT ut_id, ut_prenomnom, ut_desc FROM utilisateur WHERE ut_id_fb = :id_fb");
+    $q->execute(array(
+        ':id_fb' => $id_fb
+    ));
+
+    return $q->fetch(PDO::FETCH_ASSOC);
 }
 
 function create_user_tw($prenomnom, $id_tw) {
@@ -144,10 +141,17 @@ function create_user_tw($prenomnom, $id_tw) {
             ':prenomnom' => $prenomnom,
             ':id_tw' => $id_tw
         ));
-        return 'success';
-    } else {
-        return 'L\'utilisateur est déjà inscrit via Twitter.';
     }
+    $q = $bdd->prepare("SELECT ut_id, ut_prenomnom, ut_desc FROM utilisateur WHERE ut_id_tw = :id_tw");
+    $q->execute(array(
+        ':id_tw' => $id_tw
+    ));
+
+    return $q->fetch(PDO::FETCH_ASSOC);
+}
+
+function update_description($ut_id) {
+    //Todo
 }
 // *****************************************
 // AVIS
@@ -217,12 +221,11 @@ function get_likes_dislikes($pu_id) {
 }
 // *****************************************
 // PUBLICATIONS
-function get_latest_publications($limit = 20) {
+function get_latest_publications() {
     global $bdd;
-    $q = $bdd->prepare("SELECT pu_titre, pu_date, pu_contenu, pu_dirfichier, ut_prenomnom " .
+    $q = $bdd->prepare("SELECT pu_titre, pu_date, pu_contenu, pu_dirfichier, ut_prenomnom, pu_type_fichier " .
                         "FROM publication INNER JOIN utilisateur ON pu_uti_auteur = ut_id " .
-                        "WHERE pu_valider = 1 ORDER BY pu_date DESC LIMIT :limit");
-    $q->bindValue(':limit', (int)trim($limit), PDO::PARAM_INT);
+                        "WHERE pu_valider = 1 ORDER BY pu_date DESC LIMIT 6");
     $q->execute();
 
     $publications = $q->fetchAll(PDO::FETCH_ASSOC);
@@ -232,7 +235,7 @@ function get_latest_publications($limit = 20) {
 
 function get_publications() {
     global $bdd;
-    $q = $bdd->prepare("SELECT pu_titre, pu_date, pu_contenu, pu_dirfichier, ut_prenomnom " .
+    $q = $bdd->prepare("SELECT pu_titre, pu_date, pu_contenu, pu_dirfichier, ut_prenomnom, pu_type_fichier " .
                         "FROM publication INNER JOIN utilisateur ON pu_uti_auteur = ut_id " .
                         "WHERE pu_valider = 1 ORDER BY pu_date DESC");
     try {
@@ -245,19 +248,27 @@ function get_publications() {
     return $publications;
 }
 
+function get_user_publications($ut_id) {
+    //todo: Only validated ones
+}
+
 function create_publication($titre, $contenu, $dirfichier, $id_auteur, $type_fichier) {
     global $bdd;
     $q = $bdd->prepare("INSERT INTO publication (pu_titre, pu_contenu, pu_dirfichier, pu_uti_auteur, pu_type_fichier, pu_valider, pu_date) " .
-                        "VALUES (:titre, :contenu, :dirfichier, :id_auteur, :type_fichier, 0, NOW())");
-    $q->execute(array(
-        ':titre' => $titre,
-        ':contenu' => $contenu,
-        ':dirfichier' => $dirfichier,
-        ':id_auteur' => $id_auteur,
-        ':type_fichier' => $type_fichier
-    ));
+                        "VALUES (:titre, :contenu, :dirfichier, :id_auteur, :type_fichier, 0, DATE_ADD(NOW(), INTERVAL 2 HOUR))");
+    try {
+        $q->execute(array(
+            ':titre' => $titre,
+            ':contenu' => $contenu,
+            ':dirfichier' => $dirfichier,
+            ':id_auteur' => $id_auteur,
+            ':type_fichier' => $type_fichier
+        ));
+        return 'success';
+    } catch (Exception $e) {
+        die($e->getMessage());
+    }
 
-    return 'success';
 }
 
 function validate_publication($pu_id, $modo_id) {
@@ -274,7 +285,17 @@ function validate_publication($pu_id, $modo_id) {
     }
 }
 
+function del_publication($pu_id) {
+    //todo:supprimer les likes/dislikes, les comentaires, les signalements, puis la publi
+}
+
 // *****************************************
 // FAVORIS
+function add_favorite($ut_id, $ut_favori) {
+    //todo
+}
 
+function del_favorite($ut_id, $ut_favori) {
+    //todo
+}
 
