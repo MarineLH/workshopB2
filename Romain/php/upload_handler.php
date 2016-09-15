@@ -1,20 +1,26 @@
 <?php
 require_once "fonctions-bdd.php";
-define("UPLOAD_DIR", "/site/wwwroot/uploads/");
+define("UPLOAD_DIR", "/uploads/");
 
 if (!empty($_FILES["myFile"])) {
     $myFile = $_FILES["myFile"];
-    $ext = pathinfo($myFile, PATHINFO_EXTENSION);
-    if($ext == "jpg" or $ext == "jpeg" or $ext == "png") {
-        $upload_direction = UPLOAD_DIR . "image/";
-    } elseif ($ext == "mp3") {
-        $upload_direction = UPLOAD_DIR . "musique/";
-    } elseif($ext == "mp4" or $ext == "mpeg") {
-        $upload_direction = UPLOAD_DIR . "video/";
+
+    switch ($_POST['pu_type_fichier']) {
+        case '1':
+            $upload_direction = UPLOAD_DIR . "image/";
+            break;
+        case '2':
+            $upload_direction = UPLOAD_DIR . "video/";
+            break;
+        case '3':
+            $upload_direction = UPLOAD_DIR . "musique/";
+            break;
+        default:
+            $upload_direction = "";
+            break;
     }
     if ($myFile["error"] !== UPLOAD_ERR_OK) {
-        echo "<p>An error occurred.</p>";
-        exit;
+        die("An error occured.");
     }
 
     // ensure a safe filename
@@ -32,8 +38,7 @@ if (!empty($_FILES["myFile"])) {
     $success = move_uploaded_file($myFile["tmp_name"],
         $upload_direction . $name);
     if (!$success) {
-        echo "<p>Unable to save file.</p>";
-        exit;
+        die("Unable to save file.");
     }
 
     // set proper permissions on the new file

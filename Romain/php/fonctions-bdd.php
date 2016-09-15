@@ -17,7 +17,7 @@ try {
 } catch(Exception $e) {
     die('Erreur : ' . $e->getMessage());
 }
-// *****************************************
+////////////////////////////
 // VERIFICATIONS
 function verif_mail($mail) {
     global $bdd;
@@ -76,7 +76,7 @@ function is_modo_or_admin($uti_id) {
         return false;
     }
 }
-// *****************************************
+////////////////////////////
 // UTILISATEUR
 function get_users() {
     global $bdd;
@@ -149,10 +149,16 @@ function create_user_tw($prenomnom, $id_tw) {
     return $q->fetch(PDO::FETCH_ASSOC);
 }
 
-function update_description($ut_id) {
-    //Todo
+function update_description($ut_id, $desc) {
+    global $bdd;
+    $q = $bdd->prepare("UPDATE utilisateur SET ut_desc = :desc WHERE ut_id = :ut_id");
+    $q->execute(array(
+        'desc' => $desc,
+        'ut_id' => $ut_id
+    ));
+    return 'success';
 }
-// *****************************************
+////////////////////////////
 // AVIS
 function like($ut_id, $pu_id) {
     global $bdd;
@@ -218,7 +224,7 @@ function get_likes_dislikes($pu_id) {
     $simple_l_d['Dislikes'] = $likes_dislikes[1]['Nb'];
     return $simple_l_d;
 }
-// *****************************************
+////////////////////////////
 // PUBLICATIONS
 function get_latest_publications() {
     global $bdd;

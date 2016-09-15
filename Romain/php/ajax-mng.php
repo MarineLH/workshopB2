@@ -2,6 +2,8 @@
 require_once ('fonctions-bdd.php');
 if(isset($_POST)) {
     switch ($_POST['requete']) {
+        /////////////////////////////////////////////
+        ////////////// UTILISATEUR //////////////////
         case 'get_users':
             $users = get_users();
             print json_encode($users);
@@ -50,10 +52,10 @@ if(isset($_POST)) {
             $pub = get_one_publication($_POST['pu_id']);
             print json_encode($pub);
             break;
-        case 'create_publication':
+        /*case 'create_publication':
             $creation = create_publication($_POST['pu_titre'], $_POST['pu_contenu'], $_POST['pu_dirfichier'], $_POST['pu_id_aut'], $_POST['pu_type_fichier']);
             print json_encode($creation);
-            break;
+            break;*/
         default:
             echo 'Requete inconnue';
             break;
