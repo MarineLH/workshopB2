@@ -24,6 +24,12 @@ if(isset($_POST)) {
             $new_user_tw = create_user_tw($_POST['ut_prenomnom'], $_POST['ut_id_tw']);
             print json_encode($new_user_tw);
             break;
+        case 'update_description':
+            $update = update_description($_POST['ut_id'], $_POST['ut_desc']);
+            print json_encode($update);
+            break;
+        /////////////////////////////////////////////
+        ///////////////////// AVIS //////////////////
         case 'like':
             $result = like($_POST['ut_id'], $_POST['pu_id']);
             print json_encode($result);
@@ -36,6 +42,8 @@ if(isset($_POST)) {
             $likes_dislikes = get_likes_dislikes($_POST['pu_id']);
             print json_encode($likes_dislikes);
             break;
+        /////////////////////////////////////////////
+        ////////////// PUBLICATIONS ///////////////
         case 'get_latest_publications':
             $latest_pubs = get_latest_publications();
             print json_encode($latest_pubs);
@@ -52,10 +60,12 @@ if(isset($_POST)) {
             $pub = get_one_publication($_POST['pu_id']);
             print json_encode($pub);
             break;
-        /*case 'create_publication':
-            $creation = create_publication($_POST['pu_titre'], $_POST['pu_contenu'], $_POST['pu_dirfichier'], $_POST['pu_id_aut'], $_POST['pu_type_fichier']);
-            print json_encode($creation);
-            break;*/
+        case 'get_pending_publications':
+            $pending = get_pending_publications();
+            print json_encode($pending);
+            break;
+        /////////////////////////////////////////////
+        ////////////// FAVORIS //////////////////////
         default:
             echo 'Requete inconnue';
             break;

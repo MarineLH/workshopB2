@@ -45,9 +45,10 @@ if (!empty($_FILES["myFile"])) {
     }
 
     // set proper permissions on the new file
-    chmod($upload_direction . $name, 0744);
+    chmod($upload_rel . $name, 0744);
 
     $new_pub = create_publication($_POST['pu_titre'], $_POST['pu_contenu'], $upload_direction . $name, $_POST['pu_id_aut'], $_POST['pu_type_fichier']);
 
-    return $new_pub;
+    return "success";
+
 }

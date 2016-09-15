@@ -297,6 +297,21 @@ function create_publication($titre, $contenu, $dirfichier, $id_auteur, $type_fic
 
 }
 
+function get_pending_publications() {
+    global $bdd;
+    $q = $bdd->prepare("SELECT pu_id, pu_titre, pu_date, pu_contenu, pu_dirfichier, ut_prenomnom, pu_type_fichier " .
+        "FROM publication INNER JOIN utilisateur ON pu_uti_auteur = ut_id " .
+        "WHERE pu_valider = 0 ORDER BY pu_date ASC");
+    try {
+        $q->execute();
+        $pending_publications = $q->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        die($e->getMessage());
+    }
+
+    return $pending_publications;
+}
+
 function validate_publication($pu_id, $modo_id) {
     global $bdd;
     if (is_modo_or_admin($modo_id)) {
